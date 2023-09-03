@@ -23,19 +23,19 @@ namespace slam
             for (size_t idx = 0; idx < keypoints.size(); idx++)
             {
                 m_Features.emplace_back(VisualFeature{
-                    .keypoint = Vector2d(static_cast<double>(keypoints.at(idx).pt.x),
-                                         static_cast<double>(keypoints.at(idx).pt.y)),
+                    .keypoint = Eigen::Vector2d(static_cast<double>(keypoints.at(idx).pt.x),
+                                                static_cast<double>(keypoints.at(idx).pt.y)),
                     .descriptor = ToEigenMat(descriptors.row(idx))});
             }
         }
         catch (const cv::Exception &e)
         {
-            ROS_ERROR("Feature extraction failed: {}", e.what());
+            ROS_ERROR("Feature extraction failed: %s", e.what());
             return false;
         }
         catch (const std::exception &e)
         {
-            ROS_ERROR("Feature extraction failed: {}", e.what());
+            ROS_ERROR("Feature extraction failed: %s", e.what());
             return false;
         }
 
@@ -43,9 +43,9 @@ namespace slam
         return true;
     }
 
-    MatrixXd VisualFeatureExtractor::ToEigenMat(const cv::Mat &matrix) const
+    Eigen::MatrixXd VisualFeatureExtractor::ToEigenMat(const cv::Mat &matrix) const
     {
-        Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> result;
+        Eigen::MatrixXf result;
         cv::cv2eigen(matrix, result);
         return result.cast<double>();
     }

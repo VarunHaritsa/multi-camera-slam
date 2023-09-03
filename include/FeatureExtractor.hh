@@ -40,7 +40,7 @@ namespace slam
          * @param [in] matrix The opencv 32-bit floating point precise matrix
          * @returns Eigen matrix with same size of type double
          */
-        MatrixXd ToEigenMat(const cv::Mat &matrix) const;
+        Eigen::MatrixXd ToEigenMat(const cv::Mat &matrix) const;
         /**
          * @brief Render the keypoints on the corresponding image update the image to be rendered
          * @param [in] image The 8-bit unsigned int image
