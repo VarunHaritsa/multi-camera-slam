@@ -1,14 +1,8 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.16.3)
 project(slam)
 
-SET(headers
-include/slam/orbExtractor.h
-include/slam/keyframeDatabase.h
-include/slam/keyframe.h
-)
-
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+## Compile C++17 
+add_compile_options(-std=c++17)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -21,18 +15,12 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  cv_bridge
 )
 
-## To avoid pointing to the ROS-OpenCV 3.3.1-dev version
-find_package(OpenCV REQUIRED
-NO_MODULE
-PATHS /home/ECE.ecoprt/installation/opencv-3.4.4/share/OpenCV
-NO_DEFAULT_PATH)
-
-find_package(CUDA 10.0 REQUIRED)
-
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+## To avoid pointing to the ROS-OpenCV 4.2 version
+find_package(OpenCV REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
@@ -40,15 +28,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 	${OpenCV_INCLUDE_DIRS}
-	${CUDA_INCLUDE_DIRS}
-)
-
-## Declare a C++ library
-CUDA_ADD_LIBRARY(customLib SHARED
-   src/orbExtractor.cc
-	 src/keyframeDatabase.cc
-	 src/keyframe.cc
-	 ${headers}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 catkin_package()
@@ -56,17 +36,10 @@ catkin_package()
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(slam_node src/mainDriver.cpp)
+add_executable(slamNode src/FeatureExtractor.cc src/main.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(slam_node
-customLib
-${catkin_LIBRARIES}
-${OpenCV_LIBRARIES}
-${CUDA_LIBRARIES}
-${CUDA_nppc_LIBRARIES}
-${CUDA_nppc_LIBRARIES}
-)
+target_link_libraries(slamNode ${OpenCV_LIBS} ${catkin_LIBRARIES} ${catkin_LIBRARY_DIRS})
 
 if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
