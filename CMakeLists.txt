@@ -15,9 +15,10 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  cv_bridge
 )
 
-## To avoid pointing to the ROS-OpenCV 3.3.1-dev version
+## To avoid pointing to the ROS-OpenCV 4.2 version
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 
@@ -35,10 +36,10 @@ catkin_package()
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(slam src/FeatureExtractor.cc src/main.cpp)
+add_executable(slamNode src/FeatureExtractor.cc src/CameraInterface.cc src/main.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(slam ${OpenCV_LIBS} ${catkin_LIBRARIES} ${catkin_LIBRARY_DIRS})
+target_link_libraries(slamNode ${OpenCV_LIBS} ${catkin_LIBRARIES} ${catkin_LIBRARY_DIRS})
 
 if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
