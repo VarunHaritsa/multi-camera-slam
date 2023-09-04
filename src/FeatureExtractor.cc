@@ -2,6 +2,16 @@
 
 #include <opencv2/core/eigen.hpp>
 
+namespace
+{
+
+    constexpr auto RENDER_KEYPOINTS = true;
+
+    const auto GAUSS_KERNEL_SIZE = cv::Size_<float>(5.0f, 5.0f);
+    const auto COLOR = cv::Scalar(0, 255, 0);
+
+} // namespace
+
 namespace slam
 {
 
@@ -14,12 +24,20 @@ namespace slam
     bool VisualFeatureExtractor::ExtractFeatures(cv::InputArray image)
     {
         std::vector<cv::KeyPoint> keypoints;
-        cv::Mat descriptors;
+        cv::Mat descriptors, grayscale = image.getMat();
+
+        // If it is a color image
+        if (image.channels() > 1)
+        {
+            cv::cvtColor(image, grayscale, cv::COLOR_BGR2GRAY);
+            auto sigma = std::max(static_cast<float>(GAUSS_KERNEL_SIZE.height) / 2.0f, 1.0f);
+            cv::GaussianBlur(grayscale, grayscale, GAUSS_KERNEL_SIZE, sigma);
+        }
 
         m_Features.clear();
         try
         {
-            m_CvOrbPtr->detectAndCompute(image, cv::noArray(), keypoints, descriptors);
+            m_CvOrbPtr->detectAndCompute(grayscale, cv::noArray(), keypoints, descriptors);
             for (size_t idx = 0; idx < keypoints.size(); idx++)
             {
                 m_Features.emplace_back(VisualFeature{
@@ -39,7 +57,9 @@ namespace slam
             return false;
         }
 
-        RenderFeatures(image.getMat(), std::move(keypoints));
+        if (RENDER_KEYPOINTS)
+            m_ImageToRender = RenderFeatures(std::move(grayscale), std::move(keypoints));
+        
         return true;
     }
 
@@ -50,12 +70,13 @@ namespace slam
         return result.cast<double>();
     }
 
-    void VisualFeatureExtractor::RenderFeatures(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints)
+    cv::Mat VisualFeatureExtractor::RenderFeatures(const cv::Mat &image,
+                                                   const std::vector<cv::KeyPoint> &keypoints) const
     {
         cv::Mat result;
         cv::drawKeypoints(image, std::move(keypoints), result, cv::Scalar(0.0, 255.0, 0.0));
         result.convertTo(result, CV_8UC3);
-        m_ImageToRender = std::make_optional<cv::Mat>(std::move(result));
+        return result;
     }
 
     const std::vector<VisualFeature> &VisualFeatureExtractor::Features() const

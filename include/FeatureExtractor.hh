@@ -45,8 +45,9 @@ namespace slam
          * @brief Render the keypoints on the corresponding image update the image to be rendered
          * @param [in] image The 8-bit unsigned int image
          * @param [in] keypoints Vector of keypoints computed in the current run
+         * @returns OpenCV image with features which is an 3-channel 8-bit unsigned integer image
          */
-        void RenderFeatures(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints);
+        cv::Mat RenderFeatures(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints) const;
 
     private:
         /// @brief Pointer to the OpenCV ORB feature extractor

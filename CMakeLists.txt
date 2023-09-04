@@ -36,7 +36,7 @@ catkin_package()
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(slamNode src/FeatureExtractor.cc src/CameraInterface.cc src/main.cpp)
+add_executable(slamNode src/FeatureExtractor.cc src/main.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(slamNode ${OpenCV_LIBS} ${catkin_LIBRARIES} ${catkin_LIBRARY_DIRS})
