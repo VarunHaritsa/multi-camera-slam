@@ -12,4 +12,11 @@ namespace slam
         Eigen::MatrixXd descriptor;
     };
 
+    struct FeatureTrackerInput
+    {
+        std::vector<VisualFeature> trainFeatures;
+        std::vector<VisualFeature> queryFeatures;
+        Eigen::Matrix3d cameraIntrinsics;
+    };
+
 } // namespace slam
