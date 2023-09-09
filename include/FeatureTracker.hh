@@ -36,20 +36,19 @@ namespace slam
 
     private:
         /**
-         * @brief Converts an Eigen descriptor matrix of type double to a 32-bit floating point opencv matrix
-         *        of the same dimensions
+         * @brief Converts an Eigen descriptor matrix of type double to a float row vector
          * @param [in] matrix The Eigen matrix to be converted
          * @returns 32-bit floating point opencv matrix
          */
         cv::Mat ToCvDescriptor(const Eigen::MatrixXd &matrix) const;
         /**
          * @brief Filter out bad matches using the Lowe's distance criterion
+         * @param [in] input The input struct with the feature vectors of the current and keyframe images.
          * @param [in] matches All the matches computed by the opencv Flann based matcher
-         * @param [in] intrinsics The camera intrinsic calibration matrix
          * @returns Vector of only "good" matches
          */
-        std::vector<cv::DMatch> FilterMatches(const std::vector<std::vector<cv::DMatch>> &matches,
-                                              const Eigen::Matrix3d &intrinsics) const;
+        std::vector<cv::DMatch> FilterMatches(const FeatureTrackerInput &input,
+                                              const std::vector<std::vector<cv::DMatch>> &matches) const;
         /**
          * @brief Draws the matches over a set of images and returns a unified opencv matrix
          * @param [in] matches Vector of "good" matches

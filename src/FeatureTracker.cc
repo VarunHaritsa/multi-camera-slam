@@ -1,7 +1,7 @@
 #include "FeatureTracker.hh"
 
 #include <opencv2/core/eigen.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
 namespace
 {
@@ -44,22 +44,17 @@ namespace slam
                       });
 
         std::vector<std::vector<cv::DMatch>> matches;
-        std::cout << queryDesc.size << "\n" << trainDesc.size << std::endl;
         m_FlannMatcher->knnMatch(queryDesc, trainDesc, matches, 2);
-        m_GoodMatches = FilterMatches(std::move(matches), input.cameraIntrinsics);
+        m_GoodMatches = FilterMatches(std::move(input), std::move(matches));
 
         if (RENDER_MATCHES)
         {
             m_CurrentImage = std::make_optional(image.value().get());
             if (!m_KeyframeImage.has_value())
-            {
                 m_KeyframeImage = std::make_optional(image.value().get());
-            }
-            else
-            {
-                m_ImageWithMatches = RenderImageWithMatches(m_GoodMatches, std::move(queryKps), std::move(trainKps));
-                m_KeyframeImage = m_CurrentImage;
-            }
+
+            m_ImageWithMatches = RenderImageWithMatches(m_GoodMatches, std::move(queryKps), std::move(trainKps));
+            m_KeyframeImage = m_CurrentImage;
         }
 
         return true;
@@ -76,8 +71,8 @@ namespace slam
         return result;
     }
 
-    std::vector<cv::DMatch> VisualFeatureTracker::FilterMatches(const std::vector<std::vector<cv::DMatch>> &matches,
-                                                                const Eigen::Matrix3d &intrinsics) const
+    std::vector<cv::DMatch> VisualFeatureTracker::FilterMatches(const FeatureTrackerInput &input,
+                                                                const std::vector<std::vector<cv::DMatch>> &matches) const
     {
         std::vector<cv::DMatch> goodMatches;
         for (const auto &match : matches)
@@ -91,6 +86,26 @@ namespace slam
                     goodMatches.emplace_back(std::move(closest));
             }
         }
+
+        // Find corresponding keypoints from the list of good matches and find the inliers that pass the
+        // essential matrix check
+        cv::Mat inliers, K, queryKps, trainKps;
+        cv::eigen2cv(input.cameraIntrinsics, K);
+        K.convertTo(K, CV_32F);
+        for (const auto &match : goodMatches)
+        {
+            queryKps.push_back(ToCvDescriptor(input.queryFeatures.at(match.queryIdx).keypoint));
+            trainKps.push_back(ToCvDescriptor(input.trainFeatures.at(match.trainIdx).keypoint));
+        }
+        cv::findEssentialMat(queryKps, trainKps, K, cv::FM_7POINT, 0.999, 1.0, inliers);
+        assert(inliers.rows == goodMatches.size());
+        for (int rowNumber = 0; rowNumber < inliers.rows; rowNumber++)
+        {
+            // If the given point isn't an inlier, encode it in the distance field of the cv match
+            if (!inliers.at<bool>(rowNumber, 0))
+                goodMatches.at(rowNumber).distance = -1.0f; // invalid distance
+        }
+        
         return goodMatches;
     }
 

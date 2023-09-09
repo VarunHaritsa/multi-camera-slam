@@ -33,9 +33,9 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     cv::Mat image;
     std::vector<slam::VisualFeature> reference;
-    Eigen::Matrix3d intrinsics;
     ROS_INFO_STREAM("Successfully initialized visual slam node");
 
+    auto intrinsics = Eigen::Matrix3d::Identity().eval();
     auto camera = cv::VideoCapture();
     auto orb = slam::VisualFeatureExtractor();
     auto track = slam::VisualFeatureTracker();
