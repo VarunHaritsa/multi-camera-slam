@@ -22,7 +22,7 @@ namespace slam
     VisualFeatureTracker::~VisualFeatureTracker() = default;
 
     bool VisualFeatureTracker::MatchFeatures(const FeatureTrackerInput &input,
-                                             const std::optional<std::reference_wrapper<cv::Mat>> &image)
+                                             const std::optional<std::reference_wrapper<const cv::Mat>> &image)
     {
         std::vector<cv::KeyPoint> trainKps, queryKps;
         cv::Mat trainDesc, queryDesc;

@@ -58,7 +58,7 @@ int main(int argc, char **argv)
                                                                    .trainFeatures = reference,
                                                                    .queryFeatures = orb.Features(),
                                                                    .cameraIntrinsics = intrinsics},
-                                                               std::make_optional(std::ref<cv::Mat>(image)));
+                                                               std::make_optional(std::cref<cv::Mat>(image)));
 
             // Rendering if the flag is enabled
             if (RENDER_IMAGE)

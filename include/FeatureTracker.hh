@@ -27,7 +27,7 @@ namespace slam
          * @returns Success / failure or finding good matches
          */
         bool MatchFeatures(const FeatureTrackerInput &input,
-                           const std::optional<std::reference_wrapper<cv::Mat>> &image);
+                           const std::optional<std::reference_wrapper<const cv::Mat>> &image);
 
         /// @brief Public access method to get the good matches for the current frame
         const std::vector<cv::DMatch> &GoodMatches() const;
